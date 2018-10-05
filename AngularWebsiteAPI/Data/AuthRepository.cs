@@ -31,10 +31,10 @@ namespace AngularWebsiteAPI.Data
             using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt)) //anything inside here is disposed of after use as the HMACSHA512 implements a dispose method
             {
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); // hash the password
-                for (int i=0;i<computedHash.Length;i++) // for each character in the password hash byte array
+                for (int i = 0; i < computedHash.Length; i++) // for each character in the password hash byte array
                 {
                     if (computedHash[i] != passwordHash[i]) return false; // if the character at this position does not match the corresponding character in the other array, return false
-                        return true; // if the hashes are the same, return true
+                        // if the hashes are the same, return true
                 }
                 return false; // otherwise return false
             }
