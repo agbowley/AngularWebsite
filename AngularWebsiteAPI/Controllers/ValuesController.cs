@@ -10,20 +10,20 @@ namespace AngularWebsite.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ValuesController : ControllerBase // values controller implementing the base controller
     {
-        private readonly DataContext _context;
+        private readonly DataContext _context; // private readonly instance of the datacontext _context
 
-        public ValuesController(DataContext context)
+        public ValuesController(DataContext context) // values controller constructor method that accepts one dbcontext overload
         {
-            _context = context;
+            _context = context; // initialise the _context to be the dbcontext
         }
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> GetValues() //async get all values
+        public async Task<IActionResult> GetValues() //async get all values from dbcontext
         {
-            var values = await _context.Values.ToListAsync();
-            return Ok(values);
+            var values = await _context.Values.ToListAsync(); // asynchronously return a list of all the values
+            return Ok(values); // return the values
         }
 
         // GET api/values/5
