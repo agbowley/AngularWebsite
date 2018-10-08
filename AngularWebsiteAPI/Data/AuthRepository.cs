@@ -1,73 +1,75 @@
 using System;
 using System.Threading.Tasks;
-using AngularWebsite.API.Data;
 using AngularWebsite.API.Models;
+using AngularWebsiteAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace AngularWebsiteAPI.Data
+namespace AngularWebsite.API.Data
 {
-    public class AuthRepository : IAuthRepository // authrepository implements the iauthrepository interface
+    public class AuthRepository : IAuthRepository
     {
-        private readonly DataContext _context; // private readonly variable _context
-        public AuthRepository(DataContext context) // constructor for the auth repository, accepts 1 overload dbcontext
+        private readonly DataContext _context;
+        public AuthRepository(DataContext context)
         {
-            _context = context; // intitialise the _context
+            _context = context;
         }
-        public async Task<User> Login(string username, string password) // user login
+        public async Task<User> Login(string username, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username); // check if a user with a matching username exists in the database (FirstOrDefaultAsync returns null instead of an exception if nothing is returned)
-            
-            if (user == null) // if no matching user, return to controller
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+
+            if (user == null)
                 return null;
             
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt)) // check if the password that was entered matches the user's passwordHash/passwordSalt
+            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
 
-            return user; // return the user object to the controller method if username and password match
+            return user;
         }
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt) // verify password by comparing it to user's hash and salt
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt)) //anything inside here is disposed of after use as the HMACSHA512 implements a dispose method
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
             {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); // hash the password
-                for (int i = 0; i < computedHash.Length; i++) // for each character in the password hash byte array
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
                 {
-                    if (computedHash[i] != passwordHash[i]) return false; // if the character at this position does not match the corresponding character in the other array, return false
-                        // if the hashes are the same, return true
+                    if (computedHash[i] != passwordHash[i]) return false;
                 }
-                return false; // otherwise return false
+                return true;
             }
         }
 
-        public async Task<User> Register(User user, string password) // register user
+        public async Task<User> Register(User user, string password)
         {
-            byte[] passwordHash, passwordSalt; // create two empty byte arrays
-            CreatePasswordHash(password, out passwordHash, out passwordSalt); // create password hash using out, passes the reference to password hash/salt in memory instead of the actual values
+            byte[] passwordHash, passwordSalt;
+            CreatePasswordHash(password, out passwordHash, out passwordSalt);
 
-            user.PasswordHash = passwordHash; // set the user's password hash to the generated password hash
-            user.PasswordSalt = passwordSalt; // set the user's password salt to the generated password salt
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
 
-            await _context.Users.AddAsync(user); // asynchronously add the user to the dbcontext
-            await _context.SaveChangesAsync(); // asynchronously save the changes to the dbcontext
+            await _context.Users.AddAsync(user);
 
-            return user; // return the user object
+            await _context.SaveChangesAsync();
+
+            return user;
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512()) // anything inside here is disposed of after use as the HMACSHA512 implements a dispose method
+            using (var hmac = new System.Security.Cryptography.HMACSHA512())
             {
-                passwordSalt = hmac.Key; // using the HMACSHA512 method, create the random key and use this as the password salt
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); // hash the password that the user typed and store it as the password hash
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                Console.WriteLine(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
             }
+            
         }
 
-        public async Task<bool> UserExists(string username) // check if the user exists
+        public async Task<bool> UserExists(string username)
         {
-            if (await _context.Users.AnyAsync(x => x.Username == username)) // asynchronously check if a user (x) has a matching username
+            if (await _context.Users.AnyAsync(x => x.Username == username))
                 return true;
-            
+
             return false;
         }
     }

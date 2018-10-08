@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AngularWebsite.API.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ namespace AngularWebsite.Controllers
             _context = context; // initialise the _context to be the dbcontext
         }
         // GET api/values
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetValues() //async get all values from dbcontext
         {
