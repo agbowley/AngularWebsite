@@ -20,7 +20,7 @@ namespace AngularWebsite.Controllers
             _context = context; // initialise the _context to be the dbcontext
         }
         // GET api/values
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetValues() //async get all values from dbcontext
         {
@@ -29,6 +29,7 @@ namespace AngularWebsite.Controllers
         }
 
         // GET api/values/5
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetValue(int id) //async get value with id
         {
