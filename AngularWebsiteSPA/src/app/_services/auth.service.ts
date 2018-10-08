@@ -23,6 +23,8 @@ export class AuthService {
   }
 
   register(model: any) {
+    console.log(model.Username);
+    console.log(model.password);
     return this.http.post(this.baseUrl + 'register', model);
   }
 
